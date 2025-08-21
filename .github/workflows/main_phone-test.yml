@@ -20,9 +20,6 @@ jobs:
         with:
           node-version: '18.x'  # Using Node.js 18 LTS for better compatibility
 
-      - name: Change to phonebook-server directory
-        run: cd Part_3/phonebook-server
-
       - name: npm install, build, and test
         working-directory: ./Part_3/phonebook-server
         run: |
