@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import Persons from "./components/Persons";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
-import axios from 'axios'
+import Service from './services/server'
+
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -14,50 +15,70 @@ const App = () => {
     person.name.toLowerCase().includes(contactSearch.toLowerCase())
   );
 
-  useEffect(function () {
-    axios.get('http://localhost:3001/persons').then(response => {
+  useEffect(() => {
+    Service.getAll().then(response => {
+      console.log(response)
       setPersons(response.data)
     })
-  },[])
+  }, [])
 
   const addPerson = (event) => {
     event.preventDefault();
-    const nameFound = persons.some(
+    const nameFound = persons.find(
       (person) => person.name.toLowerCase() === newName.toLowerCase()
     );
 
     if (nameFound) {
-      alert(`${newName} is already added to phonebook`);
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const updatedPerson = { ...nameFound, number: addPhone };
+        Service.update(nameFound.id, updatedPerson).then(returnedPerson => {
+          setPersons(persons.map(p => p.id !== nameFound.id ? p : returnedPerson));
+          setNewName("");
+          setPhone("");
+        });
+      }
       return;
     }
 
-    setPersons([...persons, { name: newName, number: addPhone }]);
-    console.log("form has changed", event.target.value);
-    setNewName("");
-    setPhone("");
+    const newPerson = { name: newName, number: addPhone };
+    Service.create(newPerson).then(returnedPerson => {
+      setPersons(persons.concat(returnedPerson));
+      setNewName("");
+      setPhone("");
+    });
   };
 
-  return (
-    <div>
+  const handleDelete = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)) {
+      Service.removePerson(id).then(() => {
+        setPersons(persons.filter(p => p.id !== id));
+      });
+    }
+  };
+
+
+    return (
       <div>
-        <h2>Phonebook</h2>
-        <Filter
-          contactSearch={contactSearch}
-          handleSearch={(event) => setSearch(event.target.value)}
+        <div>
+          <h2>Phonebook</h2>
+          <Filter
+            contactSearch={contactSearch}
+            handleSearch={(event) => setSearch(event.target.value)}
+          />
+        </div>
+        <h3>add a new</h3>
+        <PersonForm
+          addPerson={addPerson}
+          newName={newName}
+          addPhone={addPhone}
+          handleName={(event) => setNewName(event.target.value)}
+          handlePhone={(event) => setPhone(event.target.value)}
         />
+        <h3>Numbers</h3>
+        <Persons persons={filterPerson} onDelete={handleDelete} />
       </div>
-      <h3>add a new</h3>
-      <PersonForm
-        addPerson={addPerson}
-        newName={newName}
-        addPhone={addPhone}
-        handleName={(event) => setNewName(event.target.value)}
-        handlePhone={(event) => setPhone(event.target.value)}
-      />
-      <h3>Numbers</h3>
-      <Persons persons={filterPerson} />
-    </div>
-  );
-};
+    );
+  };
+
 
 export default App;
