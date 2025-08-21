@@ -98,6 +98,17 @@ app.get("/info", (request, response) => {
   response.send(info);
 });
 
+// Health check endpoint for Azure App Service
+app.get("/health", (request, response) => {
+  response.status(200).json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || "development",
+    version: require('./package.json').version
+  });
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
