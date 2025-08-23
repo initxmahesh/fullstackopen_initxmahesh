@@ -27,18 +27,25 @@ app.get("/api/persons", (request, response) => {
 
 app.get("/api/persons/:id", (request, response) => {
   const id = request.params.id;
-  const person = persons.find((person) => person.id === id);
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).send("Data not Found!");
-  }
-});
+  Person.findById(id).then(person =>{
+    if(person){
+      response.json(person)
+    }else {
+      response.status(404).send("Data not Found")
+    }
+  })
+})
 
 app.delete("/api/persons/:id", (request, response) => {
   const id = request.params.id;
-  persons = persons.filter((person) => person.id !== id);
-  response.status(204).end();
+  Person.findByIdAndDelete(id).then(person =>{
+    console.log(person)
+    if(person){
+      response.status(204).end()
+    }else {
+      response.status(404).send('Person not found')
+    }
+  })
 });
 
 app.post("/api/persons", (request, response) => {
@@ -48,17 +55,21 @@ app.post("/api/persons", (request, response) => {
       error: "No name or number",
     });
   }
-  if (persons.find((p) => p.name === body.name)) {
-    return response.status(400).json({ error: "name must be unique" });
-  }
-  const person = {
-    name: body.name,
-    number: body.number || false,
-    id: String(Math.floor(Math.random() * 1000000)),
-  };
-  persons = persons.concat(person);
-  response.json(person);
-  
+
+  // Person.findOne({name}).then(person => {
+  //   if(person){
+  //     return response.status(400).json({error: 'name must be unique'})
+  //   }
+  // })
+
+  const person = new Person({
+    name:body.name,
+    number: body.number
+  })
+
+  person.save().then(savedPerson =>{
+    response.json(savedPerson)
+  })
 });
 
 app.put("/api/persons/:id", (request, response) => {
