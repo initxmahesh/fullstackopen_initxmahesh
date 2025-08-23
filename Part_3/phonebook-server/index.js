@@ -17,8 +17,6 @@ app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body")
 );
 
-let persons = [];
-
 app.get("/api/persons", (request, response) => {
   Person.find({}).then(persons => {
     response.json(persons);
@@ -66,7 +64,6 @@ app.post("/api/persons", (request, response) => {
     name:body.name,
     number: body.number
   })
-
   person.save().then(savedPerson =>{
     response.json(savedPerson)
   })
@@ -88,12 +85,13 @@ app.put("/api/persons/:id", (request, response) => {
 });
 
 app.get("/info", (request, response) => {
-  const info = `Phonebook has info for ${persons.length} people
-  <p>${new Date()}</p>`;
-  response.send(info);
+  Person.countDocuments({}).then(length => {
+    response.send(`Phone has info for ${length} people
+      <p>${new Date()}</p>`)
+  })
 });
 
-const PORT = process.env.PORT?process.env.PORT : 3001;
+const PORT = process.env.PORT ? process.env.PORT : 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
