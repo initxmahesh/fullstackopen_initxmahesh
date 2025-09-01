@@ -3,12 +3,15 @@ import Persons from "./components/Persons";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Service from "./services/server";
+import Notify from "./components/Notify";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [addPhone, setPhone] = useState("");
   const [contactSearch, setSearch] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
+
 
   const filterPerson = persons.filter((person) =>
     person.name.toLowerCase().includes(contactSearch.toLowerCase())
@@ -45,11 +48,18 @@ const App = () => {
     }
 
     const newPerson = { name: newName, number: addPhone };
-    Service.create(newPerson).then((returnedPerson) => {
-      setPersons(persons.concat(returnedPerson));
-      setNewName("");
-      setPhone("");
-    });
+    Service.create(newPerson)
+      .then((returnedPerson) => {
+        setPersons(persons.concat(returnedPerson));
+        setNewName("");
+        setPhone("");
+      })
+      .catch((error) => {
+        setErrorMessage(error.response.data.error)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      });
   };
 
   const handleDelete = (id, name) => {
@@ -64,6 +74,7 @@ const App = () => {
     <div>
       <div>
         <h2>Phonebook</h2>
+        <Notify message={errorMessage} />
         <Filter
           contactSearch={contactSearch}
           handleSearch={(event) => setSearch(event.target.value)}
