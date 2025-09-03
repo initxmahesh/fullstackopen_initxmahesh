@@ -56,7 +56,7 @@ describe('favorite blog', () => {
   ]
 
   test('of empty list is null', () => {
-    assert.strictEqual(listHelper.favoriteBlog([]), null)
+    assert.deepStrictEqual(listHelper.favoriteBlog([]), null)
   })
 
   test('of many is the one with most likes', () => {
@@ -68,6 +68,63 @@ describe('favorite blog', () => {
       url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
       likes: 2005,
       __v: 0
+    })
+  })
+})
+
+describe('most blogs', () => {
+  const blogs = [
+    {
+      _id: '5a422aa71b54a676234d17f8',
+      title: 'Go To Harmful',
+      author: 'Mahesh Chaudhary',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+      likes: 1005,
+      __v: 0
+    },
+    {
+      _id: '5a422aa71b54a676234d17f9',
+      title: 'Go To Considered Harmful',
+      author: 'Edsger',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+      likes: 95,
+      __v: 0
+    },
+    {
+      _id: '5a439aa74b54a676234d37f6',
+      title: 'Muna Madan',
+      author: 'Mahesh Chaudhary',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+      likes: 20000,
+      __v: 0
+    },
+    {
+      _id: '5a422aa71b54a676234d17f5',
+      title: 'Go Considered Harmful',
+      author: 'W. Dijkstra',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+      likes: 2005,
+      __v: 0
+    },
+    {
+      _id: '5a422aa71b54a676234d27f6',
+      title: 'Jungle of Hurdle',
+      author: 'Mahesh Chaudhary',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+      likes: 200,
+      __v: 0
+    },
+  ]
+
+  test('empty list returns null', () => {
+    assert.deepStrictEqual(listHelper.mostBlogs([]), null)
+  })
+
+  test('author with most blogs', () => {
+    const result = listHelper.mostBlogs(blogs)
+    assert.deepStrictEqual(result, {
+      author: "Mahesh Chaudhary",
+      blogs: 3,
     })
   })
 })
