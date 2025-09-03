@@ -17,5 +17,4 @@ app.use('/api/blogs', blogsRouter)
 
 app.use(express.json())
 
-
 module.exports = app
