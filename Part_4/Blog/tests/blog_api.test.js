@@ -1,5 +1,5 @@
 const assert = require('node:assert')
-const { test, after, beforeEach } = require("node:test");
+const { test, after, beforeEach, describe } = require("node:test");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
@@ -38,18 +38,35 @@ beforeEach(async () => {
     await blogObject.save();
 })
 
-test.only("blogs are returned as json", async () => {
+describe('adding the blogs', () => { 
+    test('a valid blog can be added', async () => {
+        const newBlog = {
+            title: 'Backend blog',
+            author: 'mahesh',
+            url: 'https://facebook.com/initxmahesh',
+            likes: 502658
+        }
+        await api.post('/api/blogs').send(newBlog).expect(201).expect('Content-Type', /application\/json/)
+        
+        const response = await api.get('/api/blogs')
+
+        assert.strictEqual(response.body.length, initialBlogs.length + 1)
+        const titles = response.body.map(ele => ele.title)
+        assert(titles.includes('Backend blog'))
+    })
+ })
+
+test("blogs are returned as json", async () => {
   await api
     .get("/api/blogs")
     .expect(200)
     .expect("Content-Type", /application\/json/);
 });
 
-test.only("all blogs are returned", async () => {
+test("all blogs are returned", async () => {
     const response = await api.get('/api/blogs')
     assert.strictEqual(response.body.length, initialBlogs.length)
 });
-
 
 after(async () => {
   await mongoose.connection.close();

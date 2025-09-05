@@ -1,13 +1,13 @@
-const { test, describe } = require("node:test");
+const { test, describe, beforeEach, afterEach } = require("node:test");
 const assert = require("node:assert");
 const listHelper = require("../utils/list_helper");
 
-// test('dummy returns one', () => {
-//   const blogs = []
+test('dummy returns one', () => {
+  const blogs = []
 
-//   const result = listHelper.dummy(blogs)
-//   assert.strictEqual(result, 1)
-// })
+  const result = listHelper.dummy(blogs)
+  assert.strictEqual(result, 1)
+})
 
 describe("total likes", () => {
   const listWithOneBlog = [
