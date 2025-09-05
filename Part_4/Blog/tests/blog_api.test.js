@@ -54,6 +54,49 @@ describe('adding the blogs', () => {
         const titles = response.body.map(ele => ele.title)
         assert(titles.includes('Backend blog'))
     })
+  
+  test("if likes property missing, it defaults to 0", async () => {
+    const newBlog = {
+      title: "No Likes Blog",
+      author: "Mahesh",
+      url: "https://example.com/nolikes",
+    };
+
+    const response = await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    assert.strictEqual(response.body.likes, 0);
+  });
+
+    test('missing title returns 400', async () => {
+    const missingTitle = {
+      author: 'Mahesh Shiva',
+      url: 'https://notfound.com/id',
+      likes: 5820
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(missingTitle)
+      .expect(400)
+  })
+
+  test('missing url returns 400', async () => {
+    const missingUrl = {
+      title: 'No URL',
+      author: 'Ram Saha',
+      likes: 10000
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(missingUrl)
+      .expect(400)
+  })
+  
  })
 
 test("blogs are returned as json", async () => {
