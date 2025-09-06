@@ -83,7 +83,7 @@ describe("adding the blogs", () => {
     };
 
     await api.post("/api/blogs").send(missingTitle).expect(400);
-  })
+  });
 
   test("missing url returns 400", async () => {
     const missingUrl = {
@@ -93,7 +93,7 @@ describe("adding the blogs", () => {
     };
 
     await api.post("/api/blogs").send(missingUrl).expect(400);
-  })
+  });
 });
 
 describe("delete a blog", () => {
