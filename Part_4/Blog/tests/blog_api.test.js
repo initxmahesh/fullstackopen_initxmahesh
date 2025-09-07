@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
 const Blog = require("../models/blog");
+const User = require("../models/user");
 
 const api = supertest(app);
 
@@ -28,18 +29,38 @@ const initialBlogs = [
   },
 ];
 
+let token;
+let userId;
+
 beforeEach(async () => {
   await Blog.deleteMany({});
-  let blogObject = new Blog(initialBlogs[0]);
-  await blogObject.save();
-  blogObject = new Blog(initialBlogs[1]);
-  await blogObject.save();
-  blogObject = new Blog(initialBlogs[2]);
-  await blogObject.save();
+  await User.deleteMany({});
+
+  const newUser = {
+    username: "testuser",
+    name: "Test User",
+    password: "password",
+  };
+
+  await api.post("/api/users").send(newUser);
+  const login = await api.post("/api/login").send({
+    username: "testuser",
+    password: "password",
+  });
+
+  token = login.body.token;
+  userId = login.body.id;
+
+  for (const blog of initialBlogs) {
+    await api
+      .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
+      .send(blog);
+  }
 });
 
 describe("adding the blogs", () => {
-  test("a valid blog can be added", async () => {
+  test("a valid blog can be added with a token", async () => {
     const newBlog = {
       title: "Backend blog",
       author: "mahesh",
@@ -48,6 +69,7 @@ describe("adding the blogs", () => {
     };
     await api
       .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -68,6 +90,7 @@ describe("adding the blogs", () => {
 
     const response = await api
       .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -82,7 +105,11 @@ describe("adding the blogs", () => {
       likes: 5820,
     };
 
-    await api.post("/api/blogs").send(missingTitle).expect(400);
+    await api
+      .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
+      .send(missingTitle)
+      .expect(400);
   });
 
   test("missing url returns 400", async () => {
@@ -92,16 +119,33 @@ describe("adding the blogs", () => {
       likes: 10000,
     };
 
-    await api.post("/api/blogs").send(missingUrl).expect(400);
+    await api
+      .post("/api/blogs")
+      .set("Authorization", `Bearer ${token}`)
+      .send(missingUrl)
+      .expect(400);
+  });
+  test("adding a blog fails if token is not given", async () => {
+    const newBlog = {
+      title: "No token",
+      author: "Author",
+      url: "http://www.notoken.com/notfound",
+      likes: 5504223,
+    };
+
+    await api.post("/api/blogs").send(newBlog).expect(401);
   });
 });
 
 describe("delete a blog", () => {
-  test("if id is valid", async () => {
-    const initialBlogs = await Blog.find({});
-    const deleteBlog = initialBlogs[0];
+  test("if id is valid and user is admin", async () => {
+    const response = await api.get("/api/blogs");
+    const deleteBlog = response.body[0];
 
-    await api.delete(`/api/blogs/${deleteBlog.id}`).expect(204);
+    await api
+      .delete(`/api/blogs/${deleteBlog.id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(204);
 
     const finalBlog = await Blog.find({});
     assert.strictEqual(finalBlog.length, initialBlogs.length - 1);
@@ -113,13 +157,14 @@ describe("delete a blog", () => {
 
 describe("update the blog list", () => {
   test("succeeds in updating likes", async () => {
-    const initialBlog = await Blog.find({});
-    const updateBlog = initialBlog[0];
+    const res = await api.get("/api/blogs");
+    const updateBlog = res.body[0];
 
     const responseData = { likes: updateBlog.likes + 10 };
 
     const response = await api
       .put(`/api/blogs/${updateBlog.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(responseData)
       .expect(200)
       .expect("Content-Type", /application\/json/);
