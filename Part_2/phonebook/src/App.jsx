@@ -11,6 +11,7 @@ const App = () => {
   const [addPhone, setPhone] = useState("");
   const [contactSearch, setSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null)
 
 
   const filterPerson = persons.filter((person) =>
@@ -40,9 +41,16 @@ const App = () => {
           setPersons(
             persons.map((p) => (p.id !== nameFound.id ? p : returnedPerson))
           );
+          setSuccessMessage(`Updated ${returnedPerson.name}'s number`);
+          setTimeout(() => setSuccessMessage(null), 5000);
           setNewName("");
           setPhone("");
-        });
+        })
+          .catch((error) => {
+            setErrorMessage(`Information of ${nameFound.name} has already been removed from server`);
+            setTimeout(() => setErrorMessage(null), 5000)
+            setPersons(persons.filter(p=> p.id !== nameFound.id))
+        })
       }
       return;
     }
@@ -51,6 +59,8 @@ const App = () => {
     Service.create(newPerson)
       .then((returnedPerson) => {
         setPersons(persons.concat(returnedPerson));
+        setSuccessMessage(`Added ${returnedPerson.name}`);
+        setTimeout(() => setSuccessMessage(null), 5000);
         setNewName("");
         setPhone("");
       })
@@ -74,7 +84,11 @@ const App = () => {
     <div>
       <div>
         <h2>Phonebook</h2>
-        <Notify message={errorMessage} />
+        {successMessage ? (
+          <Notify message={successMessage} type='success' />
+        ) : errorMessage ? (
+            <Notify message={errorMessage} type='error' />
+        ):null}
         <Filter
           contactSearch={contactSearch}
           handleSearch={(event) => setSearch(event.target.value)}
