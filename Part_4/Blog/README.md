@@ -1,3 +1,0 @@
-# BlogList
-
-- BlogList Backend
