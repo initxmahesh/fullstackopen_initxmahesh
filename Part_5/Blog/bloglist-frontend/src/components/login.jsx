@@ -19,6 +19,7 @@ const Login = ({ onLogin }) => {
           <input
             type="text"
             value={username}
+            autoComplete="current-username"
             onChange={({ target }) => setUsername(target.value)}
           />
         </label>
@@ -29,6 +30,7 @@ const Login = ({ onLogin }) => {
           <input
             type="password"
             value={password}
+            autoComplete="current-password"
             onChange={({ target }) => setPassword(target.value)}
           />
         </label>
