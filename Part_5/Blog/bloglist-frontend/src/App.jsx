@@ -4,6 +4,7 @@ import Login from "./components/login";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import Logout from "./components/Logout";
+import CreateBlog from "./components/CreateBlog";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -11,10 +12,8 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
-    if (user) {
-      blogService.getAll().then((blogs) => setBlogs(blogs));
-    }
-  }, [user]);
+    blogService.getAll().then((blogs) => setBlogs(blogs));
+  }, []);
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
@@ -24,6 +23,14 @@ const App = () => {
       blogService.setToken(user.token);
     }
   }, []);
+
+  const createBlog = async (blog) => {
+    const newBlog = await blogService.create(blog);
+    setBlogs(blogs.concat(newBlog));
+
+    {/* Showing Particular User Logged in Blog */}
+    // setBlogs(blogs.concat({ ...newBlog, user }));
+  };
 
   const handleLogin = async ({ username, password }) => {
     try {
@@ -57,13 +64,19 @@ const App = () => {
         {user.name} logged in <Logout />
       </div>
       <br />
-      {blogs
-        .filter((blog) => {
-          return blog.user?.username === user.username;
-        })
+      <div>
+        <CreateBlog createBlog={createBlog} />
+      </div>
+
+      {/* For particular user logged in */}
+      {/* {blogs.filter(blog => blog.user?.username ===user.username)
         .map((blog) => (
           <Blog key={blog.id} blog={blog} />
-        ))}
+        ))} */}
+
+      {blogs.map((blog) => (
+        <Blog key={blog.id} blog={blog} />
+      ))}
     </>
   );
 };
