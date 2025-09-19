@@ -28,7 +28,7 @@ const userExtractor = async (request, response, next) => {
     }
     const decodedToken = jwt.verify(token, process.env.SECRET);
     if (!decodedToken.id) {
-      return response.status(401).json({ error: "token invalid" });
+      return response.status(401).json({ error: "token missing" });
     }
     const user = await User.findById(decodedToken.id);
     request.user = user;
@@ -49,10 +49,7 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: "malformatted id" });
   } else if (error.name === "ValidationError") {
     return response.status(400).json({ error: error.message });
-  } else if (
-    error.name === "MongoServerError" &&
-    error.message.includes("E11000 duplicate key error")
-  ) {
+  } else if (error.name === "MongoServerError" && error.code === 11000) {
     return response
       .status(400)
       .json({ error: "expected `username` must be unique" });

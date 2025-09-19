@@ -1,7 +1,7 @@
 const blogsRouter = require("express").Router();
 const Blog = require("../models/blog");
-// const User = require("../models/user");
-// const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const jwt = require("jsonwebtoken");
 const middleware = require("../utils/middleware");
 
 blogsRouter.get("/", async (request, response) => {
@@ -15,6 +15,9 @@ blogsRouter.post(
   async (request, response, next) => {
     try {
       const user = request.user;
+      if (!user) {
+        return response.status(401).json({ error: "user not found" });
+      }
       const { title, url, author, likes } = request.body;
       if (!title || !url) {
         return response.status(400).json({ error: "title or url missing" });
@@ -49,7 +52,7 @@ blogsRouter.delete(
         return response.status(404).json({ error: "blog not found" });
       }
 
-      if (blog.user.toString() !== user._id.toString()) {
+      if (blog.user && blog.user.toString() !== user._id.toString()) {
         return response
           .status(403)
           .json({ error: "only the creator can delete this blog" });
