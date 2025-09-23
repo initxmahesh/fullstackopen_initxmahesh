@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Blog from "./components/Blog";
 import Login from "./components/login";
 import blogService from "./services/blogs";
@@ -6,12 +6,14 @@ import loginService from "./services/login";
 import Logout from "./components/Logout";
 import CreateBlog from "./components/CreateBlog";
 import Notify from "./components/Notify";
+import Togglable from "./components/Togglable";
 
 const App = () => {
   const [user, setUser] = useState(null);
   const [blogs, setBlogs] = useState([]);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const blogFormRef = useRef();
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -29,6 +31,9 @@ const App = () => {
   const createBlog = async (blog) => {
     const newBlog = await blogService.create(blog);
     setBlogs(blogs.concat(newBlog));
+
+    blogFormRef.current.toggleVisibility();
+
     setSuccessMessage(`a new blog ${newBlog.title} by ${newBlog.author} added`);
     setTimeout(() => setSuccessMessage(null), 5000);
 
@@ -64,6 +69,14 @@ const App = () => {
     );
   }
 
+  function blogsForm() {
+    return (
+      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
+        <CreateBlog createBlog={createBlog} />
+      </Togglable>
+    );
+  }
+
   return (
     <>
       <h2>blogs</h2>
@@ -73,7 +86,8 @@ const App = () => {
       </div>
       <br />
       <div>
-        <CreateBlog createBlog={createBlog} />
+        {/* <CreateBlog createBlog={createBlog} /> */}
+        {blogsForm()}
       </div>
 
       {/* For particular user logged in */}
