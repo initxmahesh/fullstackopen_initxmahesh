@@ -43,6 +43,16 @@ const App = () => {
     // setBlogs(blogs.concat({ ...newBlog, user }));
   };
 
+  const handleLike = async (blog) => {
+    const updatedBlog = {
+      ...blog,
+      likes: blog.likes + 1,
+      // user: blog.user.id || blog.user
+    };
+    const returnedBlog = await blogService.update(blog.id, updatedBlog);
+    setBlogs(blogs.map((b) => (b.id !== blog.id ? b : returnedBlog)));
+  };
+
   const handleLogin = async ({ username, password }) => {
     try {
       const user = await loginService.login({ username, password });
@@ -97,7 +107,7 @@ const App = () => {
         ))} */}
 
       {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} handleLike={handleLike} />
       ))}
     </>
   );
