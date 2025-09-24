@@ -45,12 +45,23 @@ const App = () => {
 
   const handleLike = async (blog) => {
     const updatedBlog = {
-      ...blog,
+      user: blog.user,
       likes: blog.likes + 1,
-      // user: blog.user.id || blog.user
+      author: blog.author,
+      title: blog.title,
+      url: blog.url,
     };
     const returnedBlog = await blogService.update(blog.id, updatedBlog);
     setBlogs(blogs.map((b) => (b.id !== blog.id ? b : returnedBlog)));
+  };
+
+  const handleDelete = async (blogToDelete) => {
+    try {
+      await blogService.remove(blogToDelete.id);
+      setBlogs(blogs.filter((b) => b.id !== blogToDelete.id));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleLogin = async ({ username, password }) => {
@@ -106,9 +117,12 @@ const App = () => {
           <Blog key={blog.id} blog={blog} />
         ))} */}
 
-      {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} handleLike={handleLike} />
-      ))}
+      {blogs
+        .slice()
+        .sort((a, b) => b.likes - a.likes)
+        .map((blog) => (
+          <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete} user={user} />
+        ))}
     </>
   );
 };
