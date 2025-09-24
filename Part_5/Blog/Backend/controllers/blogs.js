@@ -74,7 +74,8 @@ blogsRouter.put(
         { likes: body.likes },
         { new: true, runValidators: true, context: "query" }
       );
-      response.json(updatedBlog);
+      const populatedBlog = await updatedBlog.populate("user", { name: 1 });
+      response.json(populatedBlog);
     } catch (error) {
       next(error);
     }
