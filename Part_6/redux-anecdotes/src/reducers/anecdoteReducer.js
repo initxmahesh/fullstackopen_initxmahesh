@@ -71,10 +71,35 @@ const anecdoteSlice = createSlice({
       );
     },
     newAnecdote(state, action) {
-      return state.concat(action.payload);
+      state.push({
+        content: action.payload,
+        id: generateId(),
+        votes: 0,
+      });
     },
   },
 });
+
+// const anecdoteSlice = createSlice({
+//   name: "anecdotes",
+//   initialState,
+//   reducers: {
+//     voteAnecdote(state, action) {
+//       const id = action.payload;
+//       const anecdoteToChange = state.find((a) => a.id === id);
+//       if (anecdoteToChange) {
+//         anecdoteToChange.votes += 1;
+//       }
+//     },
+//     newAnecdote(state, action) {
+//       state.push({
+//         content: action.payload,
+//         id: generateId(),
+//         votes: 0,
+//       });
+//     },
+//   },
+// });
 
 export const { voteAnecdote, newAnecdote } = anecdoteSlice.actions;
 export default anecdoteSlice.reducer;
