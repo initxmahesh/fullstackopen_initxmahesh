@@ -1,3 +1,5 @@
+import { createSlice } from "@reduxjs/toolkit";
+
 const anecdotesAtStart = [
   "If it hurts, do it more often",
   "Adding manpower to a late software project makes it later!",
@@ -19,40 +21,60 @@ const asObject = (anecdote) => {
 
 const initialState = anecdotesAtStart.map(asObject);
 
-const voteAnecdote = (id) => {
-  return {
-    type: "VOTE",
-    payload: id,
-  };
-};
+// const voteAnecdote = (id) => {
+//   return {
+//     type: "VOTE",
+//     payload: id,
+//   };
+// };
 
-const newAnecdote = (content) => {
-  return {
-    type: "NEW_ANECDOTE",
-    payload: {
-      content,
-      id: generateId(),
-      votes: 0,
-    },
-  };
-};
+// const newAnecdote = (content) => {
+//   return {
+//     type: "NEW_ANECDOTE",
+//     payload: {
+//       content,
+//       id: generateId(),
+//       votes: 0,
+//     },
+//   };
+// };
 
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case "VOTE": {
-      const id = action.payload;
+// const reducer = (state = initialState, action) => {
+//   switch (action.type) {
+//     case "VOTE": {
+//       const id = action.payload;
+//       return state.map((anecdote) =>
+//         anecdote.id === id
+//           ? { ...anecdote, votes: anecdote.votes + 1 }
+//           : anecdote
+//       );
+//     }
+//     case "NEW_ANECDOTE": {
+//       return [...state, action.payload];
+//     }
+//     default:
+//       return state;
+//   }
+// };
+
+// export { reducer, voteAnecdote, newAnecdote };
+
+const anecdoteSlice = createSlice({
+  name: "anecdotes",
+  initialState,
+  reducers: {
+    voteAnecdote(state, action) {
       return state.map((anecdote) =>
-        anecdote.id === id
+        anecdote.id === action.payload
           ? { ...anecdote, votes: anecdote.votes + 1 }
           : anecdote
       );
-    }
-    case "NEW_ANECDOTE": {
-      return [...state, action.payload];
-    }
-    default:
-      return state;
-  }
-};
+    },
+    newAnecdote(state, action) {
+      return state.concat(action.payload);
+    },
+  },
+});
 
-export { reducer, voteAnecdote, newAnecdote };
+export const { voteAnecdote, newAnecdote } = anecdoteSlice.actions;
+export default anecdoteSlice.reducer;
