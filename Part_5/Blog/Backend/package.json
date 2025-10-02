@@ -6,7 +6,7 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development node --watch index.js",
-    "test": "cross-env  NODE_ENV=test node --test --test-concurrency=1"
+    "test": "cross-env  NODE_ENV=test node --test"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,10 @@
     "mongoose": "^8.18.0"
   },
   "devDependencies": {
-    "supertest": "^7.1.4"
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "jsdom": "^27.0.0",
+    "supertest": "^7.1.4",
+    "vitest": "^3.2.4"
   }
 }
