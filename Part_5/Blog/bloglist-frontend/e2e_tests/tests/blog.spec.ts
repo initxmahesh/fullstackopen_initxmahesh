@@ -4,16 +4,16 @@ const { loginWith } = require("./helper");
 describe("Blog app", () => {
   let userdb;
   beforeEach(async ({ page, request }) => {
-    await request.post("http://localhost:5173/api/testing/reset");
+    await request.post("/api/testing/reset");
 
     (userdb = {
       username: "initxmahesh",
       name: "maheshfirst",
       password: "password",
     }),
-      await request.post("http://localhost:5173/api/users", {});
+      await request.post("/api/users", {});
 
-    await page.goto("http://localhost:5173");
+    await page.goto("/");
   });
 
   test("Login form is shown", async ({ page }) => {
@@ -50,15 +50,39 @@ describe("Blog app", () => {
     test("a new blog can be created", async ({ page }) => {
       await page.getByRole("button", { name: "create new blog" }).click();
 
-      await page.getByLabel("title:").fill("Test Blog Title");
-      await page.getByLabel("author:").fill("Test Author");
+      await page.getByLabel("title:").fill("Testing title");
+      await page.getByLabel("author:").fill("Testing author");
       await page.getByLabel("url:").fill("http://testblog.com");
 
       await page.getByRole("button", { name: /create/i }).click();
 
       await expect(
-        page.getByText("Test Blog Title by Test Author")
+        page.getByText("Testing title by Testing author")
       ).toBeVisible();
+    });
+
+    test("a blog can be liked", async ({ page }) => {
+      await page.getByRole("button", { name: "create new blog" }).click();
+      await page.getByLabel("title:").fill("Testing like title");
+      await page.getByLabel("author:").fill("Liked author");
+      await page.getByLabel("url:").fill("http://testlike.com");
+      await page.getByRole("button", { name: /create/i }).click();
+
+      await expect(
+        page.getByText("Testing like title by Liked author")
+      ).toBeVisible();
+
+      const blog = page
+        .getByText("Testing like title Liked author")
+        .nth(-1)
+        .locator("..");
+      await blog.getByRole("button", { name: /view/i }).click();
+
+      const likeButton = blog.getByRole("button", { name: /like/i });
+      await expect(likeButton).toBeVisible();
+      await likeButton.click();
+
+      await expect(blog.getByText(/likes 1/i)).toBeVisible();
     });
   });
 });
