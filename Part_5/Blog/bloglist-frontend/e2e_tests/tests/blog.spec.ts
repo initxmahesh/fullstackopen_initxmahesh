@@ -1,22 +1,22 @@
+import { loginWith, createBlog } from "./helper";
 const { test, expect, beforeEach, describe } = require("@playwright/test");
-const { loginWith } = require("./helper");
 
 describe("Blog app", () => {
-  let userdb;
   beforeEach(async ({ page, request }) => {
     await request.post("/api/testing/reset");
-
-    (userdb = {
-      username: "initxmahesh",
-      name: "maheshfirst",
-      password: "password",
-    }),
-      await request.post("/api/users", {});
+    await request.post("/api/users", {
+      userdb: {
+        username: "initxmahesh",
+        name: "maheshfirst",
+        password: "password",
+      },
+    });
 
     await page.goto("/");
   });
 
   test("Login form is shown", async ({ page }) => {
+    await expect(page.getByText("Log in to application")).toBeVisible();
     await expect(page.getByLabel("username")).toBeVisible();
     await expect(page.getByLabel("password")).toBeVisible();
     await expect(page.getByRole("button", { name: /login/i })).toBeVisible();
@@ -27,7 +27,7 @@ describe("Blog app", () => {
       //   await page.getByLabel("username").fill(userdb.username);
       //   await page.getByLabel("password").fill(userdb.password);
       //     await page.getByRole("button", { name: /login/i }).click();
-      await loginWith(page, userdb.username, userdb.password);
+      await loginWith(page, "initxmahesh", "password");
 
       await expect(page.getByText("maheshfirst logged in")).toBeVisible();
     });
@@ -36,7 +36,7 @@ describe("Blog app", () => {
       //   await page.getByLabel("username").fill(userdb.username);
       //   await page.getByLabel("password").fill("wrong");
       //   await page.getByRole("button", { name: /login/i }).click();
-      await loginWith(page, userdb.username, "wrong");
+      await loginWith(page, "initxmahesh", "wrong");
 
       await expect(page.getByText(/wrong username or password/i)).toBeVisible();
     });
@@ -44,20 +44,23 @@ describe("Blog app", () => {
 
   describe("When logged in", () => {
     beforeEach(async ({ page }) => {
-      await loginWith(page, userdb.username, userdb.password);
+      await loginWith(page, "initxmahesh", "password");
     });
 
     test("a new blog can be created", async ({ page }) => {
-      await page.getByRole("button", { name: "create new blog" }).click();
-
-      await page.getByLabel("title:").fill("Testing title");
-      await page.getByLabel("author:").fill("Testing author");
-      await page.getByLabel("url:").fill("http://testblog.com");
-
-      await page.getByRole("button", { name: /create/i }).click();
+      const rand = Date.now();
+      const title = `Blog Title ${rand}`;
+      await createBlog(page, title, "Blog Author", "https://blog.test.com");
 
       await expect(
-        page.getByText("Testing title by Testing author")
+        page.getByText(`a new blog Blog Title ${rand} by Blog Author added`)
+      ).toBeVisible({ timeout: 3000 });
+
+      await expect(
+        page.getByRole("button", { name: /create new blog/i })
+      ).toBeVisible();
+      await expect(
+        page.getByText(`Blog Title ${rand} Blog Author`)
       ).toBeVisible();
     });
   });
