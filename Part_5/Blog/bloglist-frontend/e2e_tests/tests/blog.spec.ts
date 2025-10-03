@@ -54,7 +54,7 @@ describe("Blog app", () => {
 
       await expect(
         page.getByText(`a new blog Blog Title ${rand} by Blog Author added`)
-      ).toBeVisible({ timeout: 3000 });
+      ).toBeVisible({ timeout: 2000 });
 
       await expect(
         page.getByRole("button", { name: /create new blog/i })
@@ -77,6 +77,27 @@ describe("Blog app", () => {
       await blog.getByRole("button", { name: /like/i }).click();
 
       await expect(blog.getByText("likes 1")).toBeVisible();
+    });
+
+    test("creator can only delete the blog", async ({ page }) => {
+      const rand = Date.now();
+      const title = `Blog Title ${rand}`;
+      await createBlog(page, title, "Blog Author", "https://blog.test.com");
+
+      const blog = page
+        .locator(".blog")
+        .filter({ hasText: `Blog Title ${rand} Blog Author` });
+      await blog.getByRole("button", { name: /view/i }).click();
+      await expect(blog.getByRole("button", { name: /remove/i })).toBeVisible();
+
+      page.on("dialog", async (dialog) => {
+        await dialog.accept();
+      });
+      await page.getByRole("button", { name: /remove/i }).click();
+
+      await expect(
+        blog.getByText(`Blog Title ${rand} Blog Author`)
+      ).not.toBeVisible();
     });
   });
 });
