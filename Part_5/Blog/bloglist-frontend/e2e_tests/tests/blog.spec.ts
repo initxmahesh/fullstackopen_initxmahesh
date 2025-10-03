@@ -99,5 +99,33 @@ describe("Blog app", () => {
         blog.getByText(`Blog Title ${rand} Blog Author`)
       ).not.toBeVisible();
     });
+
+    test("creator only has remove button", async ({ page, request }) => {
+      const rand = Date.now();
+      const title = `Blog Title ${rand}`;
+      await createBlog(page, title, "Blog Author", "https://blog.test.com");
+
+      const blog = page
+        .locator(".blog")
+        .filter({ hasText: `Blog Title ${rand} Blog Author` });
+      await blog.getByRole("button", { name: /view/i }).click();
+      await expect(blog.getByRole("button", { name: /remove/i })).toBeVisible();
+
+      await page.getByRole("button", { name: /logout/i }).click();
+      await request.post("/api/users", {
+        userdb: {
+          username: "initxmahesh1",
+          name: "mahesh",
+          password: "password",
+        },
+      });
+
+      await loginWith(page, "initxmahesh1", "password");
+
+      await blog.getByRole("button", { name: /view/i }).click();
+      await expect(
+        blog.getByRole("button", { name: /remove/i })
+      ).not.toBeVisible();
+    });
   });
 });
