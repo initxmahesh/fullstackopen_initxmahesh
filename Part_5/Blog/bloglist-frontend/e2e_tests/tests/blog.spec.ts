@@ -63,5 +63,20 @@ describe("Blog app", () => {
         page.getByText(`Blog Title ${rand} Blog Author`)
       ).toBeVisible();
     });
+    test("a blog can be liked", async ({ page }) => {
+      const rand = Date.now();
+      const title = `Blog Title ${rand}`;
+      await createBlog(page, title, "Blog Author", "https://blog.test.com");
+
+      const blog = page
+        .locator(".blog")
+        .filter({ hasText: `Blog Title ${rand} Blog Author` });
+      await blog.getByRole("button", { name: /view/i }).click();
+
+      await expect(blog.getByText("likes 0")).toBeVisible();
+      await blog.getByRole("button", { name: /like/i }).click();
+
+      await expect(blog.getByText("likes 1")).toBeVisible();
+    });
   });
 });
