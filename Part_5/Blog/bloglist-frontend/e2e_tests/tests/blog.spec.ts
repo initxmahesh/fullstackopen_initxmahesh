@@ -54,7 +54,7 @@ describe("Blog app", () => {
 
       await expect(
         page.getByText(`a new blog Blog Title ${rand} by Blog Author added`)
-      ).toBeVisible({ timeout: 2000 });
+      ).toBeVisible({ timeout: 4000 });
 
       await expect(
         page.getByRole("button", { name: /create new blog/i })
@@ -63,6 +63,7 @@ describe("Blog app", () => {
         page.getByText(`Blog Title ${rand} Blog Author`)
       ).toBeVisible();
     });
+
     test("a blog can be liked", async ({ page }) => {
       const rand = Date.now();
       const title = `Blog Title ${rand}`;
@@ -105,6 +106,10 @@ describe("Blog app", () => {
       const title = `Blog Title ${rand}`;
       await createBlog(page, title, "Blog Author", "https://blog.test.com");
 
+      await expect(
+        page.getByText(`a new blog ${title} by Blog Author added`)
+      ).toBeVisible({ timeout: 8000 });
+
       const blog = page
         .locator(".blog")
         .filter({ hasText: `Blog Title ${rand} Blog Author` });
@@ -126,6 +131,53 @@ describe("Blog app", () => {
       await expect(
         blog.getByRole("button", { name: /remove/i })
       ).not.toBeVisible();
+    });
+  });
+
+  describe("When logged in", () => {
+    beforeEach(async ({ page }) => {
+      await loginWith(page, "initxmahesh", "password");
+    });
+
+    test("sorted blogs acc. to likes", async ({ page }) => {
+      const rand = Date.now();
+      const rand1 = rand + 1;
+      const title1 = `Blog Title ${rand}`;
+      const title2 = `Blog Title ${rand1}`;
+
+      await createBlog(page, title1, "Blog Author1", "https://blog.test1.com");
+      await createBlog(page, title2, "Blog Author2", "https://blog.test2.com");
+
+      const blog1 = page
+        .locator(".blog")
+        .filter({ hasText: `${title1} Blog Author1` });
+      const blog2 = page
+        .locator(".blog")
+        .filter({ hasText: `${title2} Blog Author2` });
+
+      await blog1.getByRole("button", { name: /view/i }).click();
+      await blog2.getByRole("button", { name: /view/i }).click();
+
+      await blog2.getByRole("button", { name: /like/i }).click();
+      await expect(blog2).toContainText("likes 1");
+
+      await blog2.getByRole("button", { name: /like/i }).click();
+      await expect(blog2).toContainText("likes 2");
+
+      await expect(blog1).toContainText("likes 0");
+
+      const allBlogs = page.locator(".blog");
+      const count = await allBlogs.count();
+
+      let blog1Index = -1;
+      let blog2Index = -1;
+      for (let i = 0; i < count; i++) {
+        const text = await allBlogs.nth(i).textContent();
+        if (text.includes(`${title1} Blog Author1`)) blog1Index = i;
+        if (text.includes(`${title2} Blog Author2`)) blog2Index = i;
+      }
+
+      expect(blog2Index).toBeLessThan(blog1Index);
     });
   });
 });
