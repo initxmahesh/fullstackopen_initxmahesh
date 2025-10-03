@@ -21,7 +21,7 @@ const Blog = ({ blog, handleLike, handleDelete, user }) => {
   const showDelete = user && blog.user && blog.user.username === user.username;
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} data-testid={`blog-${blog.id}`}>
       <div>
         {blog.title} {blog.author}
         <button onClick={() => setView(!view)}>{view ? "hide" : "view"}</button>

@@ -32,8 +32,12 @@ blogsRouter.post(
       const saveBlog = await blog.save();
       user.blogs = user.blogs.concat(saveBlog._id);
       await user.save();
+      const populatedBlog = await saveBlog.populate("user", {
+        username: true,
+        name: true,
+      });
 
-      response.status(201).json(saveBlog);
+      response.status(201).json(populatedBlog);
     } catch (error) {
       next(error);
     }
@@ -77,7 +81,10 @@ blogsRouter.put(
         { likes: body.likes },
         { new: true, runValidators: true, context: "query" }
       );
-      const populatedBlog = await updatedBlog.populate("user", { name: 1 });
+      const populatedBlog = await updatedBlog.populate("user", {
+        username: 1,
+        name: 1,
+      });
       response.json(populatedBlog);
     } catch (error) {
       next(error);

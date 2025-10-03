@@ -45,7 +45,7 @@ const App = () => {
 
   const handleLike = async (blog) => {
     const updatedBlog = {
-      user: blog.user,
+      user: blog.user.id || blog.user,
       likes: blog.likes + 1,
       author: blog.author,
       title: blog.title,
@@ -121,7 +121,13 @@ const App = () => {
         .slice()
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete} user={user} />
+          <Blog
+            key={blog.id}
+            blog={blog}
+            handleLike={handleLike}
+            handleDelete={handleDelete}
+            user={user}
+          />
         ))}
     </>
   );
